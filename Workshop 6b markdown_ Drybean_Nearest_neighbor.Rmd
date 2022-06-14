@@ -1,0 +1,116 @@
+---
+title: "Drybeans_HW2.5"
+output: pdf_document
+---
+
+#Nicholas-Carr-HW3-REU
+
+
+```{r setup, include=FALSE}
+library(readr)
+library(maptools)
+library(ggplot2)
+library(raster)
+library(psych)
+library(gmodels)
+library(FactoMineR) #library for conducting PCA
+library(factoextra) # library for plotting PCA
+library(missMDA) #for imputing if you have missing data
+library(hyperoverlap)
+library(Rmisc)
+library(car)
+library(dplyr)
+library(ggplot2)
+library(MuMIn)
+library(drc)
+library(class)
+
+```
+
+## 1.	Import the data
+```{r}
+df <- read.csv("C:/Users/nickc/Desktop/Github/nickc/dry-bean-data/dryBean_dataset.csv")
+head(df)
+str(df)
+summary(df)
+df$Class=as.factor(df$Class)
+
+```
+
+## 2. Explore nearest neighbors:
+```{r}
+
+##Generate a random number that is 90% of the total number of rows in dataset.
+ ran1 <- sample(1:nrow(df), 0.5* nrow(df)) 
+ ran2 <- sample(1:nrow(df), 0.7*nrow(df))
+ ran3 <- sample(1:nrow(df), 0.9*nrow(df))
+
+
+##Run nomalization on first 4 coulumns of dataset because they are the predictors
+df_norm <- scale(df[,2:17])
+ 
+summary(df_norm)
+
+##extract training set
+df_train1 <- df_norm[ran1,] 
+df_train2 <- df_norm[ran2,]
+df_train3 <- df_norm[ran3,]
+
+##extract testing set
+ df_test1 <- df_norm[-ran1,] 
+ df_test2 <- df_norm[-ran2,]
+ df_test3 <- df_norm[-ran3,]
+
+ ##extract 5th column of train dataset because it will be used as 'cl' argument in knn function.
+ df_target_category1 <- df[ran1,1]
+ df_target_category2 <- df[ran2,1]
+ df_target_category3 <- df[ran3,1]
+ 
+
+ ##extract 5th column if test dataset to measure the accuracy
+ df_test_category1 <- df[-ran1,1]
+ df_test_category2 <- df[-ran2,1]
+ df_test_category3 <- df[-ran3,1]
+
+ 
+  ##run knn function
+ pr1 <- knn(df_train1,df_test1,cl=df_target_category1,k=10)
+ pr2 <- knn(df_train2,df_test2,cl=df_target_category2,k=10)
+ pr3 <- knn(df_train3,df_test3,cl=df_target_category3,k=10)
+ 
+ ##create confusion matrix
+ tab1 <- table(pr1,df_test_category1)
+ tab2 <- table(pr2,df_test_category2)
+ tab3 <- table(pr3,df_test_category3)
+ 
+
+ ##this function divides the correct predictions by total number of predictions that tell us how accurate the model is.
+ 
+ accuracy1 <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+ accuracy1(tab1)
+ accuracy2 <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+ accuracy2(tab2)
+ accuracy3 <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+ accuracy3(tab3)
+ 
+ hclust_rows <- as.dendrogram(hclust(dist(tab1)))  # Calculate hclust dendrograms
+ hclust_cols <- as.dendrogram(hclust(dist(tab1)))
+ heatmap(tab1,                                     # Draw heatmap with hclust dendrograms
+        Rowv = hclust_rows,
+        Colv = hclust_cols)
+ 
+ heatmap(tab2)
+ heatmap(tab3)
+
+```
+**3.	Now try it with the PCA output**	
+```{r}
+
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
