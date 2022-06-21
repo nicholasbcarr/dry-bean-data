@@ -1,0 +1,100 @@
+---
+title: "Drybeans_HW4"
+output: pdf_document
+---
+
+# Nicholas-Carr-HW4-REU
+
+
+```{r setup, include=FALSE}
+library(readr)
+library(maptools)
+library(ggplot2)
+library(raster)
+library(psych)?
+library(gmodels)
+library(FactoMineR) #library for conducting PCA
+library(factoextra) # library for plotting PCA
+library(missMDA) #for imputing if you have missing data
+library(hyperoverlap)
+library(Rmisc)
+library(car)
+library(dplyr)
+library(ggplot2)
+library(MuMIn)
+library(drc)
+library(rcompanion)
+library(nlstools)
+library(kernlab)
+
+```
+
+## 1.	Import the data
+```{r}
+df <- read.csv("C:/Users/nickc/Desktop/Github/nickc/dry-bean-data/dryBean_dataset.csv")
+head(df)
+str(df)
+summary(df)
+df$Class=as.factor(df$Class)
+table(df$Class)
+Derm = df %>% filter(Class == "Dermason")
+print(dim(Derm))
+
+```
+
+## 2. Subset data for creating hyperplanes:
+```{r}
+ggplot(data=df,mapping=aes(x=Area,y=Eccentricity ,color=Class)) +
+  geom_point() +
+  theme_bw()+
+  labs(title="Area x Eccentricity") +
+  xlab("Area") +
+  ylab("Eccentricity")
+
+```
+##3. Fit the SVM
+```{r}
+##  Setting default kernel parameters
+
+library(e1071)
+x <- df[,-1]
+y <- df[,1]
+model_svm <- svm(Class~., data=df)
+summary(model_svm)
+pred <- predict(model_svm,x)
+plot(pred,y)
+poop <-confusionMatrix(pred, y)
+poop
+library(caret)
+confusionMatrix(pred,y)
+
+a <- df[,c(1,2,7)]                 #new dataframe using class, area, eccentricity
+summary(a)                         #show the new dataframe
+xx <-df[,-1]                       #strip the column names from a
+yy <-df[,1]                        #get the data
+model_svm1 <- svm(Class~., data=a) #for each class model each column
+summary(model_svm1)                #print model summary
+pred1 <- predict(model_svm1, xx)   #predisct model
+plot(pred1, yy)                    #plot the prediction
+poop1 <-confusionMatrix(pred1, yy) #create the confusion matrix and assign it to poop1
+poop1                              #print the matrix
+
+
+b <- df[,c(1,2,3,7,8)]
+xxx <-df[,-1]
+yyy <-df[,1]
+model_svm2 <- svm(Class~., data=b)
+summary(model_svm2)
+pred2 <- predict(model_svm2, xxx)
+plot(pred2, yyy)
+poop2 <-confusionMatrix(pred2, yyy)
+poop2
+?svm
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
